@@ -1,6 +1,6 @@
 /* FTMO Lot Calculator — Service Worker (offline support)
    Bump CACHE version όταν αλλάζει το app για να ανανεωθεί στους χρήστες. */
-var CACHE = 'ftmo-lot-v1';
+var CACHE = 'ftmo-lot-v2';
 var ASSETS = [
   './',
   './index.html',
@@ -12,7 +12,10 @@ var ASSETS = [
 
 self.addEventListener('install', function(e){
   e.waitUntil(
-    caches.open(CACHE).then(function(c){ return c.addAll(ASSETS); })
+    caches.open(CACHE).then(function(c){
+      /* cache:'reload' skips the HTTP cache, so an update can never re-cache a stale copy */
+      return Promise.all(ASSETS.map(function(a){ return c.add(new Request(a, {cache:'reload'})); }));
+    })
       .then(function(){ return self.skipWaiting(); })
   );
 });

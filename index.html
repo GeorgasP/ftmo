@@ -919,8 +919,9 @@ function doAnalyze(){
       'anthropic-dangerous-direct-browser-access':'true'
     },
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:500,
+      model:'claude-sonnet-5',
+      max_tokens:1024,
+      thinking:{type:'disabled'}, /* Sonnet 5 thinks by default; plain extraction does not need it */
       messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/png',data:imgB64}},
         {type:'text',text:prompt}
@@ -930,7 +931,7 @@ function doAnalyze(){
     if(!r.ok) return r.json().then(function(e){throw new Error(e.error&&e.error.message||'API Error '+r.status);});
     return r.json();
   }).then(function(data){
-    var raw=((data.content&&data.content[0]&&data.content[0].text)||'{}').replace(/```json|```/g,'').trim();
+    var raw=(((data.content||[]).filter(function(b){return b&&b.type==='text';})[0]||{}).text||'{}').replace(/```json|```/g,'').trim();
     var parsed;
     try{ parsed=JSON.parse(raw); }catch(ex){ throw new Error('Μη έγκυρη απάντηση AI'); }
     aiDat=parsed;
